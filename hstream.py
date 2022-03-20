@@ -139,6 +139,20 @@ if menu == 'Inventor':
     country = st.selectbox( 'Country', values )
     new_df  = new_df[ new_df['Country'] == country ]
 
+    # get unique licensor list
+    tm_list   = list( new_df[ "Licensor" ] )
+    tm_u_list = list( set( tm_list ) )
+
+    # count
+    cn_list = []
+    for elem in tm_u_list:
+        count = tm_list.count( elem )
+        cn_list.append( [ count, elem ] )
+    cn_list.sort( reverse=True )
+    values = [ 'All' ] + [ elem[1] for elem in cn_list ]
+    licensor = st.selectbox( 'Licensor', values )
+    if licensor != 'All': new_df = new_df[ new_df['Licensor'] == licensor ]  
+
     # get unique inventor list
     pn_list   = list( new_df[ "Patent Number" ] )
     total     = len( pn_list )
