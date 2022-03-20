@@ -135,9 +135,9 @@ if menu == 'Inventor':
         new_df = df[ df['Profile'] == profile ]
     
     # Country selector
-    values  = [ 'US', 'EP', 'CN' ]
+    values  = [ 'All', 'US', 'EP', 'CN' ]
     country = st.selectbox( 'Country', values )
-    new_df  = new_df[ new_df['Country'] == country ]
+    if country != 'All': new_df  = new_df[ new_df['Country'] == country ]
 
     # get unique licensor list
     tm_list   = list( new_df[ "Licensor" ] )
@@ -160,10 +160,12 @@ if menu == 'Inventor':
     # for each patent number
     li_list = []
     for elem in pn_list:
-        if elem in pt:
+        try:
             tmp = json.loads( pt[elem]['inventor_name'] )
             for val in tmp:
                 li_list.append( val[ 'inventor_name' ] )
+        except:
+            pass
     
     li_u_list = list( set( li_list ) )
 
