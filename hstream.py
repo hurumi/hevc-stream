@@ -110,6 +110,9 @@ if menu == 'Licensor':
     df_li.set_index( 'Licensor', inplace=True )    
     df_li.sort_values( by='NumberOfPatents', axis=0, ascending=False, inplace=True )
 
+    # write text
+    st.write( f'Total number: patents ({total}) unique licensors ({len(li_u_list)})' )
+
     # write dataframe
     dfs = df_li.style.format( {'Ratio(%)': lambda val: f'{val:.2f}'})
     st.table( dfs )
@@ -165,6 +168,9 @@ if menu == 'Inventor':
     df_li[ 'Ratio(%)'        ] = ratio_list
     df_li.set_index( 'Inventor', inplace=True )    
     df_li.sort_values( by='NumberOfPatents', axis=0, ascending=False, inplace=True )
+
+    # write text
+    st.write( f'Total number: patents ({total}) unique inventors ({len(li_u_list)})' )
 
     # write dataframe
     dfs = df_li.style.format( {'Ratio(%)': lambda val: f'{val:.2f}'})
