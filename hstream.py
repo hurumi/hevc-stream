@@ -40,12 +40,15 @@ pno = list( df[ 'Patent Number' ] )
 
 for idx, key in enumerate( pno ):
     pos = key.find( '-EP' )
-    if pos > 0:
+    if pos >= 0:
         cnt[ idx ] = 'EP'
         pno[ idx ] = key[pos+1:]
+    pos = key.find( 'KR10-' )
+    if pos >= 0:
+        pno[ idx ] = key.replace( '-','' )
 
-df[ 'Country'       ] = cnt
-df[ 'Patent Number' ] = pno
+df[ 'Country New'       ] = cnt
+df[ 'Patent Number New' ] = pno
 
 with open( PATENT_JSON, 'r' ) as fp:
     pt = json.load( fp )
@@ -61,7 +64,7 @@ pt.update( pt_ext )
 
 # add sidebar
 st.sidebar.title( 'HEVC Advance Statistics' )
-menu = st.sidebar.radio( "MENU", ( 'Licensor', 'Inventor' ) )
+menu = st.sidebar.radio( "MENU", ( 'Licensor', 'Inventor', 'Reference' ) )
 
 # -------------------------------------------------------------------------------------------------
 # Licensor
@@ -87,7 +90,7 @@ if menu == 'Licensor':
     if country == 'All': 
         pass
     else:
-        new_df = new_df[ new_df['Country'] == country ]
+        new_df = new_df[ new_df['Country New'] == country ]
 
     # get unique licensor list
     li_list   = list( new_df[ "Licensor" ] )
@@ -113,6 +116,15 @@ if menu == 'Licensor':
     # write text
     st.write( f'Total number: patents ({total}) unique licensors ({len(li_u_list)})' )
 
+    # download button
+    csv = new_df.to_csv().encode( 'utf-8' )
+    st.download_button(
+        label     = "Download filtered data as CSV",
+        data      = csv,
+        file_name = f'{profile}-{country}.csv',
+        mime      = 'text/csv',
+    )
+
     # write dataframe
     dfs = df_li.style.format( {'Ratio(%)': lambda val: f'{val:.2f}'})
     st.table( dfs )
@@ -137,7 +149,7 @@ if menu == 'Inventor':
     # Country selector
     values  = [ 'All', 'US', 'EP', 'CN' ]
     country = st.selectbox( 'Country', values )
-    if country != 'All': new_df  = new_df[ new_df['Country'] == country ]
+    if country != 'All': new_df  = new_df[ new_df['Country New'] == country ]
 
     # get unique licensor list
     tm_list   = list( new_df[ "Licensor" ] )
@@ -154,20 +166,23 @@ if menu == 'Inventor':
     if licensor != 'All': new_df = new_df[ new_df['Licensor'] == licensor ]  
 
     # get unique inventor list
-    pn_list   = list( new_df[ "Patent Number" ] )
+    pn_list   = list( new_df[ 'Patent Number New' ] )
     total     = len( pn_list )
 
-    # for each patent number
     li_list = []
+    iv_list = []
     for elem in pn_list:
         try:
-            tmp = json.loads( pt[elem]['inventor_name'] )
-            for val in tmp:
-                li_list.append( val[ 'inventor_name' ] )
+            tmp1 = json.loads( pt[elem]['inventor_name'] )
+            tmp2 = [ val[ 'inventor_name' ] for val in tmp1 ]
+            li_list = li_list + tmp2
+            iv_list.append( '|'.join( tmp2 ) )
         except:
-            pass
-    
+            iv_list.append( 'N/A' )
     li_u_list = list( set( li_list ) )
+
+    # insert inventor column
+    new_df[ 'Inventor' ] = iv_list
 
     # count
     count_list = []
@@ -188,6 +203,35 @@ if menu == 'Inventor':
     # write text
     st.write( f'Total number: patents ({total}) unique inventors ({len(li_u_list)})' )
 
+    # download button
+    csv = new_df.to_csv().encode( 'utf-8' )
+    st.download_button(
+        label     = f"Download filtered data as CSV (with inventor names)",
+        data      = csv,
+        file_name = f'{profile}-{country}-{licensor}.csv',
+        mime      = 'text/csv',
+    )
+
     # write dataframe
     dfs = df_li.style.format( {'Ratio(%)': lambda val: f'{val:.2f}'})
     st.table( dfs )
+
+# -------------------------------------------------------------------------------------------------
+# Reference
+# -------------------------------------------------------------------------------------------------
+
+if menu == 'Reference':
+
+    st.subheader( 'Reference resources' )
+
+    st.write( "- AccessAdvance Home: [Link](https://accessadvance.com)" )
+    st.write( "- HEVC Advance Patent Overview: [Link](https://accessadvance.com/licensing-programs/hevc-advance/)" )
+    st.write( "- HEVC Advance Licensor List: [Link](https://accessadvance.com/hevc-advance-patent-pool-licensors/)" )
+    st.write( "- HEVC Advance Licensee List: [Link](https://accessadvance.com/hevc-advance-patent-pool-licensees/)" )
+    st.write( "- HEVC Advance Patent List: [Link](https://accessadvance.com/hevc-advance-patent-list/)" )
+
+    st.write( "#### HEVC WORLDWIDE ESSENTIAL PATENTS LANDSCAPE" )
+    st.write( "\n" )
+
+    land_url = 'https://accessadvance.com/wp-content/uploads/2022/01/2022Q1-HEVC-Patent-Diagram-01-31-22-1536x1152.jpg'
+    st.image( land_url, use_column_width='auto' )
