@@ -244,6 +244,11 @@ if menu == 'Filter':
     for num_col in out_df.columns:
         if '%' in num_col:
             gb.configure_column( num_col, header_name=num_col, valueFormatter='value.toFixed(2)', type='rightAligned' )
+        if num_col == 'Patent Number New':
+            cellRenderer = JsCode('''function(params) {return '<a href="https://patents.google.com/patent/' + 
+                                     params.value + '" target="_blank">'+ params.value+'</a>'}''')
+            gb.configure_column( num_col, header_name=num_col, cellRenderer=cellRenderer )
+
     gb.configure_pagination()
     go = gb.build()
     ret = AgGrid( out_df, gridOptions=go, theme='light', allow_unsafe_jscode=True )
