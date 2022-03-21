@@ -102,12 +102,12 @@ def get_inventor_df( _df ):
 
     return result
 
-def get_filtered_df( profile, country, licensor, inventor ):
+def get_filtered_df( org_df, profile, country, licensor, inventor ):
 
     if profile == 'All': 
-        new_df = df
+        new_df = org_df
     else:
-        new_df = df[ df['Profile'] == profile ]    
+        new_df = org_df[ org_df['Profile'] == profile ]    
 
     if country  != 'All': new_df = new_df[ new_df['Country New'] == country ]
     if licensor != 'All': new_df = new_df[ new_df['Licensor'   ] == licensor ]
@@ -137,11 +137,6 @@ def get_ccode_dict( df ):
 df = pd.read_csv( PATENT_CSV  )
 cc = pd.read_csv( COUNTRY_CSV )
 
-# analyze
-country_df  = get_country_df ( df )
-licensor_df = get_licensor_df( df )
-inventor_df = get_inventor_df( df )
-
 # country code dictionary
 ccode_dict  = get_ccode_dict( cc )
 
@@ -170,32 +165,44 @@ if menu == 'Filter':
     values  = [ 'Main/Main10', 'Multiview', 'Optional', 'Range Extension', 'Scalability', 'All' ]
     profile = col1.selectbox( 'Profile', values, key='profile' )
 
+    # update
+    new_df = get_filtered_df( df, profile, 'All', 'All', 'All' )
+
     # ---------------------------------------------------------------------------------------------
     # Country selector
     # ---------------------------------------------------------------------------------------------
 
-    values = [ 'All' ] + list( country_df['Country'] )    
-    country = col2.selectbox( 'Country', values, key='country', format_func=lambda x: ccode_dict[x] )
+    _tmp_df = get_country_df( new_df )
+    values = [ 'All' ] + list( _tmp_df['Country'] )
+    index  = values.index( st.session_state.country ) if st.session_state.country in values else 0
+    country = col2.selectbox( 'Country', values, index=index, key='country', format_func=lambda x: ccode_dict[x] )
+
+    # update
+    new_df = get_filtered_df( new_df, 'All', country, 'All', 'All' )
 
     # ---------------------------------------------------------------------------------------------
     # Licensor selector
     # ---------------------------------------------------------------------------------------------
 
-    values = [ 'All' ] + list( licensor_df['Licensor'] )
-    licensor = col1.selectbox( 'Licensor', values, key='licensor' )
+    _tmp_df = get_licensor_df( new_df )
+    values = [ 'All' ] + list( _tmp_df['Licensor'] )
+    index  = values.index( st.session_state.licensor ) if st.session_state.licensor in values else 0
+    licensor = col1.selectbox( 'Licensor', values, index=index, key='licensor' )
+
+    # update
+    new_df = get_filtered_df( new_df, 'All', 'All', licensor, 'All' )
 
     # ---------------------------------------------------------------------------------------------
     # Inventor selector
     # ---------------------------------------------------------------------------------------------
 
-    values = [ 'All' ] + list( inventor_df['Inventor'] )
-    inventor = col2.selectbox( 'Inventor', values, key='inventor' )
+    _tmp_df = get_inventor_df( new_df )
+    values = [ 'All' ] + list( _tmp_df['Inventor'] )
+    index  = values.index( st.session_state.inventor ) if st.session_state.inventor in values else 0
+    inventor = col2.selectbox( 'Inventor', values, index=index, key='inventor' )
 
-    # ---------------------------------------------------------------------------------------------
-    # Filtering
-    # ---------------------------------------------------------------------------------------------
-
-    new_df = get_filtered_df( profile, country, licensor, inventor )
+    # update
+    new_df = get_filtered_df( new_df, 'All', 'All', 'All', inventor )
 
     # ---------------------------------------------------------------------------------------------
     # Statistics selector
