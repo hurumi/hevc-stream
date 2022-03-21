@@ -20,6 +20,15 @@ from st_aggrid.shared import JsCode
 PATENT_CSV      = 'patent_new.csv'
 COUNTRY_CSV     = 'code.csv'
 
+linkRenderer    = JsCode(
+    '''
+    function(params) {
+        return '<a href="https://patents.google.com/patent/' + 
+                            params.value + '" target="_blank">'+ params.value+'</a>'
+    }
+    '''
+)
+
 # -------------------------------------------------------------------------------------------------
 # Functions
 # -------------------------------------------------------------------------------------------------
@@ -243,11 +252,9 @@ if menu == 'Filter':
     gb = GridOptionsBuilder.from_dataframe( out_df )
     for num_col in out_df.columns:
         if '%' in num_col:
-            gb.configure_column( num_col, header_name=num_col, valueFormatter='value.toFixed(2)', type='rightAligned' )
+            gb.configure_column( num_col, header_name=num_col, valueFormatter='value.toFixed(2)' )
         if num_col == 'Patent Number New':
-            cellRenderer = JsCode('''function(params) {return '<a href="https://patents.google.com/patent/' + 
-                                     params.value + '" target="_blank">'+ params.value+'</a>'}''')
-            gb.configure_column( num_col, header_name=num_col, cellRenderer=cellRenderer )
+            gb.configure_column( num_col, header_name=num_col, cellRenderer=linkRenderer )
 
     gb.configure_pagination()
     go = gb.build()
