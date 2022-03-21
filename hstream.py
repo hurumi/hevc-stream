@@ -18,6 +18,7 @@ from st_aggrid.shared import JsCode
 # -------------------------------------------------------------------------------------------------
 
 PATENT_CSV      = 'patent_new.csv'
+COUNTRY_CSV     = 'code.csv'
 
 # -------------------------------------------------------------------------------------------------
 # Functions
@@ -114,6 +115,16 @@ def get_filtered_df( profile, country, licensor, inventor ):
 
     return new_df
 
+def get_ccode_dict( df ):
+
+    code_list    = df['Code'   ]
+    country_list = df['Country']
+
+    dict_from_list = dict( zip( code_list, country_list ) )
+    dict_from_list[ 'All' ] = 'All'
+
+    return dict_from_list 
+
 # -------------------------------------------------------------------------------------------------
 # Functions (Callbacks)
 # -------------------------------------------------------------------------------------------------
@@ -123,12 +134,16 @@ def get_filtered_df( profile, country, licensor, inventor ):
 # -------------------------------------------------------------------------------------------------
 
 # read source data
-df = pd.read_csv( PATENT_CSV )
+df = pd.read_csv( PATENT_CSV  )
+cc = pd.read_csv( COUNTRY_CSV )
 
 # analyze
 country_df  = get_country_df ( df )
 licensor_df = get_licensor_df( df )
 inventor_df = get_inventor_df( df )
+
+# country code dictionary
+ccode_dict  = get_ccode_dict( cc )
 
 # -------------------------------------------------------------------------------------------------
 # Layout
@@ -160,7 +175,7 @@ if menu == 'Filter':
     # ---------------------------------------------------------------------------------------------
 
     values = [ 'All' ] + list( country_df['Country'] )    
-    country = col2.selectbox( 'Country', values, key='country' )
+    country = col2.selectbox( 'Country', values, key='country', format_func=lambda x: ccode_dict[x] )
 
     # ---------------------------------------------------------------------------------------------
     # Licensor selector
