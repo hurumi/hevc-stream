@@ -174,7 +174,10 @@ if menu == 'Filter':
 
     _tmp_df = get_country_df( new_df )
     values = [ 'All' ] + list( _tmp_df['Country'] )
-    index  = values.index( st.session_state.country ) if st.session_state.country in values else 0
+    try:
+        index = values.index( st.session_state.country )
+    except:
+        index = 0
     country = col2.selectbox( 'Country', values, index=index, key='country', format_func=lambda x: ccode_dict[x] )
 
     # update
@@ -186,7 +189,10 @@ if menu == 'Filter':
 
     _tmp_df = get_licensor_df( new_df )
     values = [ 'All' ] + list( _tmp_df['Licensor'] )
-    index  = values.index( st.session_state.licensor ) if st.session_state.licensor in values else 0
+    try:
+        index = values.index( st.session_state.licensor )
+    except:
+        index = 0    
     licensor = col1.selectbox( 'Licensor', values, index=index, key='licensor' )
 
     # update
@@ -198,7 +204,10 @@ if menu == 'Filter':
 
     _tmp_df = get_inventor_df( new_df )
     values = [ 'All' ] + list( _tmp_df['Inventor'] )
-    index  = values.index( st.session_state.inventor ) if st.session_state.inventor in values else 0
+    try:
+        index = values.index( st.session_state.inventor )
+    except:
+        index = 0
     inventor = col2.selectbox( 'Inventor', values, index=index, key='inventor' )
 
     # update
