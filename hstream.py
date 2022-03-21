@@ -10,17 +10,109 @@ import streamlit as st
 import pandas    as pd
 import json
 
+from st_aggrid import AgGrid, GridOptionsBuilder
+from st_aggrid.shared import JsCode
+
 # -------------------------------------------------------------------------------------------------
 # Globals
 # -------------------------------------------------------------------------------------------------
 
-PATENT_CSV      = 'patent.csv'
-PATENT_JSON     = 'patent.json'
-PATENT_EXT_JSON = 'patent_ext.json'
+PATENT_CSV      = 'patent_new.csv'
 
 # -------------------------------------------------------------------------------------------------
 # Functions
 # -------------------------------------------------------------------------------------------------
+
+def get_country_df( _df ):
+
+    # get list of licensors
+    tm_list   = list( _df[ "Country New" ] )
+
+    # get unique list of licensors
+    tm_u_list = list( set( tm_list ) )
+
+    # count & sort
+    cn_list = []
+    for elem in tm_u_list:
+        count = tm_list.count( elem )
+        cn_list.append( [ count, elem ] )
+    cn_list.sort( reverse=True )
+
+    # make dataframe
+    total = len( tm_list )
+    result = pd.DataFrame( columns=[ 'Country', 'NumberOfPatents', "Ratio(%)" ] )
+    result['Country'        ] = [ elem[1] for elem in cn_list ]
+    result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
+    result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
+
+    return result
+
+def get_licensor_df( _df ):
+
+    # get list of licensors
+    tm_list   = list( _df[ "Licensor" ] )
+
+    # get unique list of licensors
+    tm_u_list = list( set( tm_list ) )
+
+    # count & sort
+    cn_list = []
+    for elem in tm_u_list:
+        count = tm_list.count( elem )
+        cn_list.append( [ count, elem ] )
+    cn_list.sort( reverse=True )
+
+    # make dataframe
+    total = len( tm_list )
+    result = pd.DataFrame( columns=[ 'Licensor', 'NumberOfPatents', "Ratio(%)" ] )
+    result['Licensor'       ] = [ elem[1] for elem in cn_list ]
+    result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
+    result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
+
+    return result
+
+def get_inventor_df( _df ):
+
+    # get list of inventor rows
+    tm_list = list( _df[ "Inventor" ] )
+
+    # get list of inventors
+    tm_split_list = []
+    for idx, elem in enumerate( tm_list ):
+        val = elem.split('|')
+        tm_split_list += val
+    
+    # get unique list of inventors
+    tm_u_list = list( set( tm_split_list ) )
+
+    # count & sort
+    cn_list = []
+    for elem in tm_u_list:
+        count = tm_split_list.count( elem )
+        cn_list.append( [ count, elem ] )
+    cn_list.sort( reverse=True )
+
+    # make dataframe
+    total = len( tm_list )
+    result = pd.DataFrame( columns=[ 'Inventor', 'NumberOfPatents', "Ratio(%)" ] )
+    result['Inventor'       ] = [ elem[1] for elem in cn_list ]
+    result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
+    result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
+
+    return result
+
+def get_filtered_df( profile, country, licensor, inventor ):
+
+    if profile == 'All': 
+        new_df = df
+    else:
+        new_df = df[ df['Profile'] == profile ]    
+
+    if country  != 'All': new_df = new_df[ new_df['Country New'] == country ]
+    if licensor != 'All': new_df = new_df[ new_df['Licensor'   ] == licensor ]
+    if inventor != 'All': new_df = new_df[ new_df['Inventor'   ].str.contains( inventor ) ]
+
+    return new_df
 
 # -------------------------------------------------------------------------------------------------
 # Functions (Callbacks)
@@ -30,33 +122,13 @@ PATENT_EXT_JSON = 'patent_ext.json'
 # Load data
 # -------------------------------------------------------------------------------------------------
 
+# read source data
 df = pd.read_csv( PATENT_CSV )
-df.drop( 'Count (Patents)', axis=1, inplace=True )
-df.drop( 'Est. Exp. Date', axis=1, inplace=True )
 
-# pre-processing
-cnt = list( df[ 'Country' ] )
-pno = list( df[ 'Patent Number' ] ) 
-
-for idx, key in enumerate( pno ):
-    pos = key.find( '-EP' )
-    if pos >= 0:
-        cnt[ idx ] = 'EP'
-        pno[ idx ] = key[pos+1:]
-    pos = key.find( 'KR10-' )
-    if pos >= 0:
-        pno[ idx ] = key.replace( '-','' )
-
-df[ 'Country New'       ] = cnt
-df[ 'Patent Number New' ] = pno
-
-with open( PATENT_JSON, 'r' ) as fp:
-    pt = json.load( fp )
-
-with open( PATENT_EXT_JSON, 'r' ) as fp:
-    pt_ext = json.load( fp )
-
-pt.update( pt_ext )
+# analyze
+country_df  = get_country_df ( df )
+licensor_df = get_licensor_df( df )
+inventor_df = get_inventor_df( df )
 
 # -------------------------------------------------------------------------------------------------
 # Layout
@@ -64,157 +136,86 @@ pt.update( pt_ext )
 
 # add sidebar
 st.sidebar.title( 'HEVC Advance Statistics' )
-menu = st.sidebar.radio( "MENU", ( 'Licensor', 'Inventor', 'Reference' ) )
+menu = st.sidebar.radio( "MENU", ( 'Filter', 'Reference' ) )
 
 # -------------------------------------------------------------------------------------------------
-# Licensor
+# Filter
 # -------------------------------------------------------------------------------------------------
 
-if menu == 'Licensor':
-    
-    st.subheader( 'Licensor Statistics' )
-
-    # Profile selector
-    values  = [ 'Main/Main10', 'Multiview', 'Optional', 'Range Extension', 'Scalability', 'All' ]
-    profile = st.selectbox( 'Profile', values )
-
-    if profile == 'All': 
-        new_df = df
-    else:
-        new_df = df[ df['Profile'] == profile ]
-    
-    # Country selector
-    values  = [ 'All', 'US', 'EP', 'CN' ]
-    country = st.selectbox( 'Country', values )
-
-    if country == 'All': 
-        pass
-    else:
-        new_df = new_df[ new_df['Country New'] == country ]
-
-    # get unique licensor list
-    li_list   = list( new_df[ "Licensor" ] )
-    li_u_list = list( set( li_list ) )
-    total     = len( li_list )
-
-    # count
-    count_list = []
-    ratio_list = []
-    for elem in li_u_list:
-        count = li_list.count( elem )
-        count_list.append( count )
-        ratio_list.append( round( count / total * 100, 2 ) )
-    
-    # make dataframe
-    df_li = pd.DataFrame( columns=[ 'Licensor', 'NumberOfPatents', "Ratio(%)" ] )
-    df_li[ 'Licensor'        ] = li_u_list
-    df_li[ 'NumberOfPatents' ] = count_list
-    df_li[ 'Ratio(%)'        ] = ratio_list
-    df_li.set_index( 'Licensor', inplace=True )    
-    df_li.sort_values( by='NumberOfPatents', axis=0, ascending=False, inplace=True )
-
-    # write text
-    st.write( f'Total number: patents ({total}) unique licensors ({len(li_u_list)})' )
-
-    # download button
-    csv = new_df.to_csv().encode( 'utf-8' )
-    st.download_button(
-        label     = "Download filtered data as CSV",
-        data      = csv,
-        file_name = f'{profile}-{country}.csv',
-        mime      = 'text/csv',
-    )
-
-    # write dataframe
-    dfs = df_li.style.format( {'Ratio(%)': lambda val: f'{val:.2f}'})
-    st.table( dfs )
-
-# -------------------------------------------------------------------------------------------------
-# Inventor
-# -------------------------------------------------------------------------------------------------
-
-if menu == 'Inventor':
+if menu == 'Filter':
   
-    st.subheader( 'Inventor Statistics' )
+    st.subheader( 'Data Filtering' )
 
+    col1, col2 = st.columns(2)
+
+    # ---------------------------------------------------------------------------------------------
     # Profile selector
+    # ---------------------------------------------------------------------------------------------
+
     values  = [ 'Main/Main10', 'Multiview', 'Optional', 'Range Extension', 'Scalability', 'All' ]
-    profile = st.selectbox( 'Profile', values )
+    profile = col1.selectbox( 'Profile', values, key='profile' )
 
-    if profile == 'All': 
-        new_df = df
-    else:
-        new_df = df[ df['Profile'] == profile ]
-    
+    # ---------------------------------------------------------------------------------------------
     # Country selector
-    values  = [ 'All', 'US', 'EP', 'CN' ]
-    country = st.selectbox( 'Country', values )
-    if country != 'All': new_df  = new_df[ new_df['Country New'] == country ]
+    # ---------------------------------------------------------------------------------------------
 
-    # get unique licensor list
-    tm_list   = list( new_df[ "Licensor" ] )
-    tm_u_list = list( set( tm_list ) )
+    values = [ 'All' ] + list( country_df['Country'] )    
+    country = col2.selectbox( 'Country', values, key='country' )
 
-    # count
-    cn_list = []
-    for elem in tm_u_list:
-        count = tm_list.count( elem )
-        cn_list.append( [ count, elem ] )
-    cn_list.sort( reverse=True )
-    values = [ 'All' ] + [ elem[1] for elem in cn_list ]
-    licensor = st.selectbox( 'Licensor', values )
-    if licensor != 'All': new_df = new_df[ new_df['Licensor'] == licensor ]  
+    # ---------------------------------------------------------------------------------------------
+    # Licensor selector
+    # ---------------------------------------------------------------------------------------------
 
-    # get unique inventor list
-    pn_list   = list( new_df[ 'Patent Number New' ] )
-    total     = len( pn_list )
+    values = [ 'All' ] + list( licensor_df['Licensor'] )
+    licensor = col1.selectbox( 'Licensor', values, key='licensor' )
 
-    li_list = []
-    iv_list = []
-    for elem in pn_list:
-        try:
-            tmp1 = json.loads( pt[elem]['inventor_name'] )
-            tmp2 = [ val[ 'inventor_name' ] for val in tmp1 ]
-            li_list = li_list + tmp2
-            iv_list.append( '|'.join( tmp2 ) )
-        except:
-            iv_list.append( 'N/A' )
-    li_u_list = list( set( li_list ) )
+    # ---------------------------------------------------------------------------------------------
+    # Inventor selector
+    # ---------------------------------------------------------------------------------------------
 
-    # insert inventor column
-    new_df[ 'Inventor' ] = iv_list
+    values = [ 'All' ] + list( inventor_df['Inventor'] )
+    inventor = col2.selectbox( 'Inventor', values, key='inventor' )
 
-    # count
-    count_list = []
-    ratio_list = []
-    for elem in li_u_list:
-        count = li_list.count( elem )
-        count_list.append( count )
-        ratio_list.append( round( count / total * 100, 2 ) )
-    
-    # make dataframe
-    df_li = pd.DataFrame( columns=[ 'Inventor', 'NumberOfPatents', "Ratio(%)" ] )
-    df_li[ 'Inventor'        ] = li_u_list
-    df_li[ 'NumberOfPatents' ] = count_list
-    df_li[ 'Ratio(%)'        ] = ratio_list
-    df_li.set_index( 'Inventor', inplace=True )    
-    df_li.sort_values( by='NumberOfPatents', axis=0, ascending=False, inplace=True )
+    # ---------------------------------------------------------------------------------------------
+    # Filtering
+    # ---------------------------------------------------------------------------------------------
 
-    # write text
-    st.write( f'Total number: patents ({total}) unique inventors ({len(li_u_list)})' )
+    new_df = get_filtered_df( profile, country, licensor, inventor )
+
+    # ---------------------------------------------------------------------------------------------
+    # Statistics selector
+    # ---------------------------------------------------------------------------------------------
+
+    values  = [ 'Raw Data', 'Country', 'Licensor', 'Inventor' ]
+    stat    = st.selectbox( 'Statistics', values )
+
+    if stat == 'Country':
+        out_df = get_country_df( new_df )
+    elif stat == 'Licensor':
+        out_df = get_licensor_df( new_df )
+    elif stat == 'Inventor':
+        out_df = get_inventor_df( new_df )
+    else:
+        out_df = new_df
 
     # download button
-    csv = new_df.to_csv().encode( 'utf-8' )
+    total = len( out_df )
+    csv = out_df.to_csv().encode( 'utf-8' )
     st.download_button(
-        label     = f"Download filtered data as CSV (with inventor names)",
+        label     = f"Download filtered data as CSV (total no. of entries = {total})",
         data      = csv,
-        file_name = f'{profile}-{country}-{licensor}.csv',
+        file_name = f'{profile}-{country}-{licensor}-{inventor}-{stat}.csv',
         mime      = 'text/csv',
     )
 
     # write dataframe
-    dfs = df_li.style.format( {'Ratio(%)': lambda val: f'{val:.2f}'})
-    st.table( dfs )
+    gb = GridOptionsBuilder.from_dataframe( out_df )
+    for num_col in out_df.columns:
+        if '%' in num_col:
+            gb.configure_column( num_col, header_name=num_col, valueFormatter='value.toFixed(2)', type='rightAligned' )
+    gb.configure_pagination()
+    go = gb.build()
+    ret = AgGrid( out_df, gridOptions=go, theme='light', allow_unsafe_jscode=True )
 
 # -------------------------------------------------------------------------------------------------
 # Reference
@@ -228,6 +229,7 @@ if menu == 'Reference':
     st.write( "- HEVC Advance Patent Overview: [Link](https://accessadvance.com/licensing-programs/hevc-advance/)" )
     st.write( "- HEVC Advance Licensor List: [Link](https://accessadvance.com/hevc-advance-patent-pool-licensors/)" )
     st.write( "- HEVC Advance Licensee List: [Link](https://accessadvance.com/hevc-advance-patent-pool-licensees/)" )
+    st.write( "- HEVC Advance Royalty Rate Structure: [Link](https://accessadvance.com/hevc-advance-patent-pool-detailed-royalty-rates/)" )
     st.write( "- HEVC Advance Patent List: [Link](https://accessadvance.com/hevc-advance-patent-list/)" )
 
     st.write( "#### HEVC WORLDWIDE ESSENTIAL PATENTS LANDSCAPE" )
