@@ -173,15 +173,15 @@ ccode_dict  = get_ccode_dict( cc )
 
 # add sidebar
 st.sidebar.title( 'HEVC Advance Stream' )
-menu = st.sidebar.radio( "MENU", ( 'Data Filter', 'Reference', 'Industry', 'News' ) )
+menu = st.sidebar.radio( "MENU", ( 'Patent Filter', 'Reference', 'Industry', 'News' ) )
 
 # -------------------------------------------------------------------------------------------------
 # Filter
 # -------------------------------------------------------------------------------------------------
 
-if menu == 'Data Filter':
+if menu == 'Patent Filter':
   
-    st.subheader( 'Data Filter' )
+    st.subheader( 'Patent Filter' )
     st.caption  ( 'Source update: 2022-02-04' )
 
     col1, col2 = st.columns(2)
