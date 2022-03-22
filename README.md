@@ -11,5 +11,5 @@ Streamlit application for HEVC Advance Patent Statistics. Main functions are:
 https://share.streamlit.io/hurumi/hevc-stream/main/hstream.py
 
 ### Example screen
-<img src="/images/filter-01.png" width="100%">
+<img src="/images/filter-02.png" width="100%">
 <hr>
