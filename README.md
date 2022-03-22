@@ -8,7 +8,7 @@ Streamlit application for HEVC Advance Patent Statistics. Main functions are:
 * Save current view to CSV file
 
 ### Demo link
-https://share.streamlit.io/hurumi/hevc-stream/main/hstream.py
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/hurumi/hevc-stream/main/hstream.py)
 
 ### Example screen
 <img src="/images/filter-02.png" width="100%">
