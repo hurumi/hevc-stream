@@ -327,10 +327,23 @@ if menu == 'Industry':
     col1.markdown( text )
 
     # ---------------------------------------------------------------------------------------------
-    # CPUs
+    # Browers
     # ---------------------------------------------------------------------------------------------
 
-    col2.write  ( '##### Supported CPUs and GPUs' )
+    col1.write  ( '##### Supported browsers' )
+    col1.caption( 'Source: [wikipedia](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding#Implementations_and_products)' )
+
+    text = '''
+        - Android browser (since version 5)
+        - Safari (since version 11)
+    '''
+    col1.markdown( text )
+
+    # ---------------------------------------------------------------------------------------------
+    # Processors
+    # ---------------------------------------------------------------------------------------------
+
+    col2.write  ( '##### Supported processors' )
     col2.caption( 'Source: [faceofit](https://www.faceofit.com/intel-amd-nvidia-support-4k-native-hevc-decoder/)' )
 
     text = '''
@@ -344,15 +357,16 @@ if menu == 'Industry':
     col2.markdown( text )
 
     # ---------------------------------------------------------------------------------------------
-    # Browers
+    # Other devices
     # ---------------------------------------------------------------------------------------------
 
-    col2.write  ( '##### Supported Browsers' )
-    col2.caption( 'Source: [wikipedia](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding#Implementations_and_products)' )
+    col2.write  ( '##### Other supported devices' )
+    col2.caption( 'Source: [faceofit](https://www.faceofit.com/intel-amd-nvidia-support-4k-native-hevc-decoder/)' )
 
     text = '''
-        - Android browser (since version 5)
-        - Safari (since version 11)
+        - XBox One or newer
+        - Roku 4 or newer
+        - Amazon Fire TV (2nd-generation) or newer
     '''
     col2.markdown( text )
 
