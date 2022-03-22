@@ -50,11 +50,14 @@ def get_country_df( _df ):
     # get unique list of licensors
     tm_u_list = list( set( tm_list ) )
 
-    # count & sort
+    # count
+    cnt_dict = { elem:0 for elem in tm_u_list }
+    for elem in tm_list: cnt_dict[elem] += 1
+
+    # sort
     cn_list = []
     for elem in tm_u_list:
-        count = tm_list.count( elem )
-        cn_list.append( [ count, elem ] )
+        cn_list.append( [ cnt_dict[elem], elem ] )
     cn_list.sort( reverse=True )
 
     # make dataframe
@@ -74,11 +77,14 @@ def get_licensor_df( _df ):
     # get unique list of licensors
     tm_u_list = list( set( tm_list ) )
 
+    # count
+    cnt_dict = { elem:0 for elem in tm_u_list }
+    for elem in tm_list: cnt_dict[elem] += 1
+
     # count & sort
     cn_list = []
     for elem in tm_u_list:
-        count = tm_list.count( elem )
-        cn_list.append( [ count, elem ] )
+        cn_list.append( [ cnt_dict[elem], elem ] )
     cn_list.sort( reverse=True )
 
     # make dataframe
