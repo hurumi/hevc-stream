@@ -163,16 +163,17 @@ ccode_dict  = get_ccode_dict( cc )
 # -------------------------------------------------------------------------------------------------
 
 # add sidebar
-st.sidebar.title( 'HEVC Advance Statistics' )
-menu = st.sidebar.radio( "MENU", ( 'Filter', 'Reference' ) )
+st.sidebar.title( 'HEVC Advance Stream' )
+menu = st.sidebar.radio( "MENU", ( 'Data Filter', 'Reference', 'Industry' ) )
 
 # -------------------------------------------------------------------------------------------------
 # Filter
 # -------------------------------------------------------------------------------------------------
 
-if menu == 'Filter':
+if menu == 'Data Filter':
   
-    st.subheader( 'Data Filtering' )
+    st.subheader( 'Data Filter' )
+    st.caption  ( 'Source update: 2022-02-04' )
 
     col1, col2 = st.columns(2)
 
@@ -277,7 +278,7 @@ if menu == 'Filter':
 
 if menu == 'Reference':
 
-    st.subheader( 'Reference resources' )
+    st.subheader( 'Reference' )
 
     st.write( "- AccessAdvance Home: [Link](https://accessadvance.com)" )
     st.write( "- HEVC Advance Patent Overview: [Link](https://accessadvance.com/licensing-programs/hevc-advance/)" )
@@ -286,8 +287,81 @@ if menu == 'Reference':
     st.write( "- HEVC Advance Royalty Rate Structure: [Link](https://accessadvance.com/hevc-advance-patent-pool-detailed-royalty-rates/)" )
     st.write( "- HEVC Advance Patent List: [Link](https://accessadvance.com/hevc-advance-patent-list/)" )
 
-    st.write( "#### HEVC WORLDWIDE ESSENTIAL PATENTS LANDSCAPE" )
+    st.write( "##### HEVC WORLDWIDE ESSENTIAL PATENTS LANDSCAPE" )
     st.write( "\n" )
 
     land_url = 'https://accessadvance.com/wp-content/uploads/2022/01/2022Q1-HEVC-Patent-Diagram-01-31-22-1536x1152.jpg'
+    st.image( land_url, use_column_width='auto' )
+
+# -------------------------------------------------------------------------------------------------
+# Industry
+# -------------------------------------------------------------------------------------------------
+
+if menu == 'Industry':
+
+    st.subheader( 'Industry' )
+
+    col1, col2 = st.columns(2)
+    
+    # ---------------------------------------------------------------------------------------------
+    # Mobile devices
+    # ---------------------------------------------------------------------------------------------
+
+    col1.write  ( '##### Supported mobile devices' )
+    col1.caption( 'Source: [arlo](https://www.arlo.com/en_no/support/faq/000062189/Which-devices-are-supported-for-HEVC-4K-or-2K-playback)' )
+
+    text = '''
+        - iPhone 7/7 Plus or newer
+        - iPad Pro or newer
+        - Samsung Galaxy S7/S7 Plus or newer
+        - Galaxy Note 8 or newer
+        - Google Pixel/Pixel XL or newer
+        - Huawei P9 or newer
+        - Xiaomi Mi 5 or newer
+        - LG G5 or newer
+        - HTC U10 or newer
+        - Sony Xperia X or newer
+        - Moto Z or newer
+        - OnePlus 3 or newer.   
+    '''
+    col1.markdown( text )
+
+    # ---------------------------------------------------------------------------------------------
+    # CPUs
+    # ---------------------------------------------------------------------------------------------
+
+    col2.write  ( '##### Supported CPUs and GPUs' )
+    col2.caption( 'Source: [faceofit](https://www.faceofit.com/intel-amd-nvidia-support-4k-native-hevc-decoder/)' )
+
+    text = '''
+        - Intel Skylake (6th-generation) or newer
+        - AMD Carizzo APU (6th-generation) or newer
+        - NVidia 900 Series GPU or newer
+        - AMD Radeon R9 Fury GPUs or newer
+        - Qualcomm Snapdragon 805 or newer
+        - Apple A8 or newer
+    '''
+    col2.markdown( text )
+
+    # ---------------------------------------------------------------------------------------------
+    # Browers
+    # ---------------------------------------------------------------------------------------------
+
+    col2.write  ( '##### Supported Browsers' )
+    col2.caption( 'Source: [wikipedia](https://en.wikipedia.org/wiki/High_Efficiency_Video_Coding#Implementations_and_products)' )
+
+    text = '''
+        - Android browser (since version 5)
+        - Safari (since version 11)
+    '''
+    col2.markdown( text )
+
+    # ---------------------------------------------------------------------------------------------
+    # Adoption ratio for each mobile OS
+    # ---------------------------------------------------------------------------------------------
+
+    st.write  ( '##### Adoption ratio for each mobile OS' )
+    st.caption( 'Source: [scientiamobile](https://www.scientiamobile.com/growing-support-of-hevc-or-h-265-video-on-mobile-devices/) (2018)' )
+
+    land_url = 'https://www.scientiamobile.com/wp-content/uploads/2018/08/HEVC-Pie-Support-by-OS1200b.png'
     st.image( land_url, use_column_width='auto' )
