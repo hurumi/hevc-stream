@@ -105,18 +105,19 @@ def get_inventor_df( _df ):
     
     # get unique list of inventors
     tm_u_list = list( set( tm_split_list ) )
-    
-    # normalized ratio
+
+    # compute ratios
+    ratio_dict      = { elem:0 for elem in tm_u_list }
     norm_ratio_dict = { elem:0 for elem in tm_u_list }
     for elem1 in tm_split_list_ext:
         for elem2 in elem1:
+            ratio_dict     [elem2] += 1
             norm_ratio_dict[elem2] += 1.0/len(elem1)
 
-    # count & sort
+    # sort
     cn_list = []
     for elem in tm_u_list:
-        count = tm_split_list.count( elem )
-        cn_list.append( [ count, elem, norm_ratio_dict[elem] ] )
+        cn_list.append( [ ratio_dict[elem], elem, norm_ratio_dict[elem] ] )
     cn_list.sort( reverse=True )
 
     # make dataframe
