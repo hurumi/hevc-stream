@@ -2,13 +2,19 @@
 # HEVC Advance Statistics
 #
 
+# disable SSL warnings
+import urllib3
+urllib3.disable_warnings( urllib3.exceptions.InsecureRequestWarning )
+
 # -------------------------------------------------------------------------------------------------
 # Imports
 # -------------------------------------------------------------------------------------------------
 
-import streamlit as st
-import pandas    as pd
-import json
+import streamlit  as st
+import pandas     as pd
+import feedparser as fp
+import requests
+import time
 
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import JsCode
@@ -28,6 +34,9 @@ linkRenderer    = JsCode(
     }
     '''
 )
+
+RSS_URL        = 'https://news.google.com/rss/search?q=hevc when:1y&hl=en-US&gl=US&ceid=US:en'
+MAX_NEWS_ITEMS = 30
 
 # -------------------------------------------------------------------------------------------------
 # Functions
@@ -164,7 +173,7 @@ ccode_dict  = get_ccode_dict( cc )
 
 # add sidebar
 st.sidebar.title( 'HEVC Advance Stream' )
-menu = st.sidebar.radio( "MENU", ( 'Data Filter', 'Reference', 'Industry' ) )
+menu = st.sidebar.radio( "MENU", ( 'Data Filter', 'Reference', 'Industry', 'News' ) )
 
 # -------------------------------------------------------------------------------------------------
 # Filter
@@ -357,6 +366,20 @@ if menu == 'Industry':
     col2.markdown( text )
 
     # ---------------------------------------------------------------------------------------------
+    # Streaming services
+    # ---------------------------------------------------------------------------------------------
+
+    col2.write  ( '##### Supported streaming services' )
+    col2.caption( 'Source: [streamingmedia](https://www.streamingmedia.com/Articles/ReadArticle.aspx?ArticleID=148866)' )
+
+    text = '''
+        - Neflix
+        - Amazon Prime
+        - Disney+
+    '''
+    col2.markdown( text )
+
+    # ---------------------------------------------------------------------------------------------
     # Other devices
     # ---------------------------------------------------------------------------------------------
 
@@ -379,3 +402,26 @@ if menu == 'Industry':
 
     land_url = 'https://www.scientiamobile.com/wp-content/uploads/2018/08/HEVC-Pie-Support-by-OS1200b.png'
     st.image( land_url, use_column_width='auto' )
+
+# -------------------------------------------------------------------------------------------------
+# News
+# -------------------------------------------------------------------------------------------------
+
+if menu == 'News':
+
+    st.subheader( 'News' )
+    st.caption( 'Source: [googlenews](https://news.google.com/search?q=hevc&hl=en-US&gl=US&ceid=US%3Aen)' )
+
+    re = requests.get( RSS_URL, verify=False )
+    if re.status_code == 200:
+        # parsing
+        parse = fp.parse( re.text )
+
+        # for each entry
+        for entry in parse['entries'][:MAX_NEWS_ITEMS]:
+            date_str = time.strftime( '%Y-%m-%d', entry["published_parsed"] )
+            text = f'<b>{entry["source"]["title"]}</b> &nbsp; <a href="{entry["link"]}">{entry["title"]}</a> ({date_str})'
+            st.markdown( text, unsafe_allow_html=True )
+        
+    else:
+        st.write( '##### No news or there are some issues. Please come back later.' )
