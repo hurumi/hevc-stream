@@ -147,6 +147,7 @@ ccode_dict  = get_ccode_dict( cc )
 # add sidebar
 st.sidebar.title( 'HEVC Advance Stream' )
 menu = st.sidebar.radio( "MENU", ( 'Patent Filter', 'Reference', 'Industry', 'News' ) )
+st.sidebar.markdown( '[**GitHub**](https://github.com/hurumi/hevc-stream)' )
 
 # -------------------------------------------------------------------------------------------------
 # Filter
