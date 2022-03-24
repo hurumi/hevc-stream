@@ -44,55 +44,21 @@ MAX_NEWS_ITEMS = 30
 
 def get_country_df( _df ):
 
-    # get list of licensors
-    tm_list   = list( _df[ "Country New" ] )
-
-    # get unique list of licensors
-    tm_u_list = list( set( tm_list ) )
-
-    # count
-    cnt_dict = { elem:0 for elem in tm_u_list }
-    for elem in tm_list: cnt_dict[elem] += 1
-
-    # sort
-    cn_list = []
-    for elem in tm_u_list:
-        cn_list.append( [ cnt_dict[elem], elem ] )
-    cn_list.sort( reverse=True )
-
-    # make dataframe
-    total = len( tm_list )
-    result = pd.DataFrame( columns=[ 'Country', 'NumberOfPatents', "Ratio(%)" ] )
-    result['Country'        ] = [ elem[1] for elem in cn_list ]
-    result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
-    result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
+    temp   = _df[ "Country New" ].value_counts()
+    result = pd.DataFrame()
+    result['Country'        ] = temp.index
+    result['NumberOfPatents'] = temp.values
+    result['Ratio(%)'       ] = temp.values / sum( temp.values ) * 100
 
     return result
 
 def get_licensor_df( _df ):
 
-    # get list of licensors
-    tm_list   = list( _df[ "Licensor" ] )
-
-    # get unique list of licensors
-    tm_u_list = list( set( tm_list ) )
-
-    # count
-    cnt_dict = { elem:0 for elem in tm_u_list }
-    for elem in tm_list: cnt_dict[elem] += 1
-
-    # count & sort
-    cn_list = []
-    for elem in tm_u_list:
-        cn_list.append( [ cnt_dict[elem], elem ] )
-    cn_list.sort( reverse=True )
-
-    # make dataframe
-    total = len( tm_list )
-    result = pd.DataFrame( columns=[ 'Licensor', 'NumberOfPatents', "Ratio(%)" ] )
-    result['Licensor'       ] = [ elem[1] for elem in cn_list ]
-    result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
-    result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
+    temp   = _df[ "Licensor" ].value_counts()
+    result = pd.DataFrame()
+    result['Licensor'       ] = temp.index
+    result['NumberOfPatents'] = temp.values
+    result['Ratio(%)'       ] = temp.values / sum( temp.values ) * 100
 
     return result
 
