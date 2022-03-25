@@ -69,36 +69,30 @@ def get_inventor_df( _df ):
 
     # get list of inventors
     tm_split_list     = []
-    tm_split_list_ext = []
     for idx, elem in enumerate( tm_list ):
         val = elem.split('|')
         tm_split_list += val
-        tm_split_list_ext.append( val )
     
     # get unique list of inventors
     tm_u_list = list( set( tm_split_list ) )
 
     # compute ratios
     ratio_dict      = { elem:0 for elem in tm_u_list }
-    norm_ratio_dict = { elem:0 for elem in tm_u_list }
-    for elem1 in tm_split_list_ext:
-        for elem2 in elem1:
-            ratio_dict     [elem2] += 1
-            norm_ratio_dict[elem2] += 1.0/len(elem1)
+    for elem in tm_split_list:
+        ratio_dict[elem] += 1
 
     # sort
     cn_list = []
     for elem in tm_u_list:
-        cn_list.append( [ ratio_dict[elem], elem, norm_ratio_dict[elem] ] )
+        cn_list.append( [ ratio_dict[elem], elem ] )
     cn_list.sort( reverse=True )
 
     # make dataframe
     total = len( tm_list )
-    result = pd.DataFrame( columns=[ 'Inventor', 'NumberOfPatents', 'Ratio(%)', 'Ratio/N(%)' ] )
+    result = pd.DataFrame( columns=[ 'Inventor', 'NumberOfPatents', 'Ratio(%)' ] )
     result['Inventor'       ] = [ elem[1] for elem in cn_list ]
     result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
     result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
-    result['Ratio/N(%)'     ] = [ round( elem[2]/total*100, 2 ) for elem in cn_list ]
 
     return result
 
@@ -229,9 +223,11 @@ if menu == 'Patent Filter':
     elif stat == 'Inventor':
         out_df = get_inventor_df( new_df )
         # Some explanations
-        st.caption( "(1) UNKNOWN = inventor search failed (2) Ratio/N(%) = normalized ratio per author w. equal contributions" )
+        st.caption( "(Note) UNKNOWN Inventor = no entry in google patent search" )
     else:
         out_df = new_df
+        # Some explanations
+        st.caption( "(Note) UNKNOWN Inventor = no entry in google patent search" )
 
     # download button
     total = len( out_df )
