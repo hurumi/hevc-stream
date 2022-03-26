@@ -64,35 +64,12 @@ def get_licensor_df( _df ):
 
 def get_inventor_df( _df ):
 
-    # get list of inventor rows
-    tm_list = list( _df[ "Inventor" ] )
-
-    # get list of inventors
-    tm_split_list     = []
-    for idx, elem in enumerate( tm_list ):
-        val = elem.split('|')
-        tm_split_list += val
-    
-    # get unique list of inventors
-    tm_u_list = list( set( tm_split_list ) )
-
-    # compute ratios
-    ratio_dict      = { elem:0 for elem in tm_u_list }
-    for elem in tm_split_list:
-        ratio_dict[elem] += 1
-
-    # sort
-    cn_list = []
-    for elem in tm_u_list:
-        cn_list.append( [ ratio_dict[elem], elem ] )
-    cn_list.sort( reverse=True )
-
-    # make dataframe
-    total = len( tm_list )
-    result = pd.DataFrame( columns=[ 'Inventor', 'NumberOfPatents', 'Ratio(%)' ] )
-    result['Inventor'       ] = [ elem[1] for elem in cn_list ]
-    result['NumberOfPatents'] = [ elem[0] for elem in cn_list ]
-    result['Ratio(%)'       ] = [ round( elem[0]/total*100, 2 ) for elem in cn_list ]
+    temp   = _df[ "Inventor" ].str.split('|').explode().value_counts()
+    total  = _df[ "Inventor" ].count()
+    result = pd.DataFrame()
+    result['Inventor'       ] = temp.index
+    result['NumberOfPatents'] = temp.values
+    result['Ratio(%)'       ] = temp.values / total * 100
 
     return result
 
