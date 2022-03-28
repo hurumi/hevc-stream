@@ -231,7 +231,7 @@ if menu == 'Patent Filter':
 
     # download button
     total = len( out_df )
-    csv = out_df.to_csv().encode( 'utf-8' )
+    csv = out_df.to_csv().encode( 'utf-8-sig' )
     st.download_button(
         label     = f"Download filtered data as CSV (total no. of entries = {total})",
         data      = csv,
